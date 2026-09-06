@@ -1,9 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { homedir, platform } from 'node:os';
+import { platform } from 'node:os';
 import { join } from 'node:path';
 import lockfile from 'proper-lockfile';
 import { builtinModels } from '@earendil-works/pi-ai/providers/all';
 import { InMemoryModelsStore, type Credential, type CredentialStore, type AuthOperationOptions, type Context } from '@earendil-works/pi-ai';
+import { loadConfig } from './config.ts';
 
 export type Mode = 'suggest' | 'explain';
 export const clean = (s: string) => s.replace(/[\x00-\x08\x0b-\x1f\x7f-\x9f]/g, '');
@@ -45,20 +46,6 @@ export class PiCredentials implements CredentialStore {
       await writeFile(this.path, JSON.stringify(data, null, 2), { mode: 0o600 });
     } finally { await release(); }
   }
-}
-
-export async function loadConfig() {
-  const own = await json(join(process.env.XDG_CONFIG_HOME || join(homedir(), '.config'), 'cmdhelp/config.json'));
-  const profile = process.env.CMDHELP_PI_PROFILE || own.profile || process.env.PI_SLIM_PROFILE_DIR || join(homedir(), '.pi/dropcode');
-  const pi = await json(join(profile, 'settings.json'));
-  const provider = process.env.CMDHELP_PROVIDER || own.provider || pi.defaultProvider;
-  const model = process.env.CMDHELP_MODEL || own.model || pi.defaultModel;
-  if (!provider || !model) throw new Error('Set provider and model in ~/.config/cmdhelp/config.json, or configure pi-slim.');
-  const reasoning = own.reasoning ?? 'off', timeoutMs = own.timeoutMs ?? 30_000;
-  if (!['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'].includes(reasoning)) throw new Error('Invalid cmdhelp reasoning level.');
-  if (!Number.isInteger(timeoutMs) || timeoutMs < 1000 || timeoutMs > 300_000) throw new Error('timeoutMs must be an integer between 1000 and 300000.');
-  if (![profile, provider, model].every(x => typeof x === 'string' && x.length > 0)) throw new Error('Profile, provider, and model must be non-empty strings.');
-  return { profile, provider, model, reasoning, timeoutMs };
 }
 
 export function systemPrompt(mode: Mode) {

@@ -1,10 +1,27 @@
 {
   "name": "cmdhelp",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Fast command suggestions and explanations for your shell",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.4.0",
+  "engines": { "bun": ">=1.4.0" },
   "bin": { "cmdhelp": "bin/cmdhelp" },
-  "scripts": { "check": "tsc --noEmit", "test": "tsx --test test/*.test.ts" },
-  "dependencies": { "@earendil-works/pi-ai": "0.85.1", "@earendil-works/pi-tui": "0.85.1", "proper-lockfile": "4.1.2", "tsx": "^4.20.0" },
-  "devDependencies": { "@types/node": "^22.0.0", "@types/proper-lockfile": "^4.1.4", "typescript": "^5.9.0" }
+  "files": ["bin", "src", "shell", "docs", "config.example.json", "README.md"],
+  "repository": { "type": "git", "url": "git+https://github.com/abzy128/cmdhelp.git" },
+  "scripts": {
+    "start": "bun src/cli.ts",
+    "check": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.85.1",
+    "@earendil-works/pi-tui": "0.85.1",
+    "proper-lockfile": "4.1.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "typescript": "^5.9.0"
+  }
 }

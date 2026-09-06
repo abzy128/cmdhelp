@@ -1,0 +1,25 @@
+name: Check
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - run: bun install --frozen-lockfile
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y zsh
+      - run: bun run check
+      - run: bun test
+      - run: zsh -n shell/cmdhelp.zsh
+      - if: runner.os == 'macOS'
+        run: script -q /dev/null zsh test/widget.zsh
+      - if: runner.os == 'Linux'
+        run: script -qec 'zsh test/widget.zsh' /dev/null

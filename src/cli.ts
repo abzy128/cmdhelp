@@ -1,20 +1,29 @@
 import { parseArgs } from 'node:util';
 import { readFile, writeFile } from 'node:fs/promises';
-import { clean, createClient, loadConfig, type Mode } from './core.ts';
+import { clean, createClient, type Mode } from './core.ts';
+import { loadConfig } from './config.ts';
+import { shellInit } from './shell.ts';
+import { version } from '../package.json';
 
 async function main() {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
     help: { type: 'boolean', short: 'h' }, mode: { type: 'string' },
+    version: { type: 'boolean', short: 'v' },
     'buffer-file': { type: 'string' }, 'output-file': { type: 'string' },
   } });
+  if (values.version) { console.log(version); return; }
   if (values.help || !positionals.length) {
-    console.log('cmdhelp suggest "task"\ncmdhelp explain \'command\'\ncmdhelp explain < command.txt\ncmdhelp ui --mode suggest|explain\ncmdhelp doctor\n\nZsh: Ctrl-X Ctrl-G suggests; Ctrl-X Ctrl-E explains.'); return;
+    console.log('cmdhelp suggest "task"\ncmdhelp explain \'command\'\ncmdhelp explain < command.txt\ncmdhelp ui --mode suggest|explain\ncmdhelp init zsh\ncmdhelp doctor\ncmdhelp --version\n\nZsh: Ctrl-X Ctrl-G suggests; Ctrl-X Ctrl-E explains.'); return;
   }
   const action = positionals[0];
+  if (action === 'init') {
+    if (positionals.length !== 2) throw new Error('Usage: cmdhelp init zsh');
+    console.log(shellInit(positionals[1])); return;
+  }
   if (action === 'doctor') {
     const config = await loadConfig();
     const client = await createClient();
-    console.log(`Profile: ${config.profile}\nModel: ${client.label}\nReasoning: ${config.reasoning}\nTimeout: ${config.timeoutMs}ms\nCatalog loaded (no inference request made).`); return;
+    console.log(`Config: ${config.configPath}\nProfile: ${config.profile}\nModel: ${client.label}\nReasoning: ${config.reasoning}\nTimeout: ${config.timeoutMs}ms\nCatalog loaded (no inference request made).`); return;
   }
   const mode = (action === 'ui' ? values.mode || 'suggest' : action) as Mode;
   if (!['suggest', 'explain'].includes(mode)) throw new Error('Expected suggest, explain, ui, or doctor.');
