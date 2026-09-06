@@ -5,13 +5,29 @@
 - macOS or Linux with zsh.
 - [Bun](https://bun.sh/docs/installation) 1.4 or newer, available on `PATH`.
 - A configured model provider: either an existing Pi profile or a provider API key. See [configuration](configuration.md).
-- GitHub access to this repository while it is private.
 
 Bun runs TypeScript directly; cmdhelp has no separate build step and does not require a separate Node installation.
+
+## Install from npm
+
+```sh
+bun add -g @abzy128/cmdhelp
+cmdhelp --version
+```
+
+Make sure the directory printed by `bun pm bin -g` is on `PATH` (normally `~/.bun/bin`). Alternatively, with npm installed:
+
+```sh
+npm install -g @abzy128/cmdhelp
+```
+
+For npm installations, put `$(npm prefix -g)/bin` on `PATH` as well as Bun's executable directory. Installing through npm does not install Bun; the CLI requires Bun 1.4+ at runtime.
 
 ## Install from a checkout
 
 Choose any directory in which to keep the application:
+
+GitHub access is required while the repository is private.
 
 ```sh
 git clone git@github.com:abzy128/cmdhelp.git
@@ -63,6 +79,14 @@ cmdhelp explain 'printf "%s\n" hello'
 
 ## Update
 
+For a registry installation, use the same package manager you installed with:
+
+```sh
+bun add -g @abzy128/cmdhelp@latest
+# Or:
+npm install -g @abzy128/cmdhelp@latest
+```
+
 From the checkout:
 
 ```sh
@@ -74,7 +98,15 @@ If you move the checkout, run `bun link` again from its new location and open a 
 
 ## Uninstall
 
-Remove the init line from your shell configuration. From the checkout, run:
+Remove the init line from your shell configuration. For a registry installation:
+
+```sh
+bun remove -g @abzy128/cmdhelp
+# Or:
+npm uninstall -g @abzy128/cmdhelp
+```
+
+For a checkout installation, run from the checkout:
 
 ```sh
 bun unlink
@@ -106,7 +138,7 @@ These tests use fixtures, make no model requests, and check cancellation, failur
 
 ## Troubleshooting
 
-- **`cmdhelp` or `bun` not found:** check `PATH` and the directory printed by `bun pm bin -g`; run `bun link` from the checkout again.
+- **`cmdhelp` or `bun` not found:** check `PATH`, Bun's executable directory, and your package manager's global executable directory. For checkout installs, run `bun link` again.
 - **Shortcut does nothing:** check `bindkey '^X^G'` and `bindkey '^X^E'`. Another plugin or your terminal may intercept them. Source the integration after plugins or choose other bindings.
 - **No model configured / unavailable model:** run `cmdhelp doctor`, then check the [configuration guide](configuration.md). Model IDs must exist in the SDK's catalog or your Pi profile's cache.
 - **Expired or rejected credentials:** open Pi with the same profile and sign in again using `/login`.

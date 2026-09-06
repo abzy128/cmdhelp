@@ -11,10 +11,7 @@ cmdhelp uses Pi's model API directly. It does not launch a coding agent or execu
 Requires [Bun](https://bun.sh/docs/installation) 1.4+ and zsh on macOS or Linux.
 
 ```sh
-git clone git@github.com:abzy128/cmdhelp.git
-cd cmdhelp
-bun install --frozen-lockfile
-bun link
+bun add -g @abzy128/cmdhelp
 ```
 
 Make sure Bun's executable directory (normally `~/.bun/bin`) is on `PATH`. Add this line to your zsh configuration, after other shell plugins:
@@ -26,6 +23,8 @@ eval "$(cmdhelp init zsh)"
 Run the same line in your current shell to enable the shortcuts immediately. Configure a provider and model before making your first request.
 
 **[Installation guide](docs/installation.md)** · **[Configuration guide](docs/configuration.md)**
+
+You can also install with `npm install -g @abzy128/cmdhelp`; Bun must still be installed and available on `PATH`.
 
 ## Use
 
@@ -80,3 +79,5 @@ zsh -n shell/cmdhelp.zsh
 ```
 
 Run `bun run start --help` during development. See [installation](docs/installation.md#verification) for the pseudo-terminal integration check.
+
+Run `bun run test:package` to pack and install the npm tarball in a temporary directory (requires npm and registry access). See [publishing](docs/publishing.md) for npm setup and releases.

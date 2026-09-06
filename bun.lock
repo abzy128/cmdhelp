@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "cmdhelp",
+      "name": "@abzy128/cmdhelp",
       "dependencies": {
         "@earendil-works/pi-ai": "0.85.1",
         "@earendil-works/pi-tui": "0.85.1",
