@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Stage npm release
 on:
   release:
     types: [published]
@@ -17,14 +17,15 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.4.0'
-      - run: bun install --frozen-lockfile
+      # Keep application dependencies and lifecycle scripts out of the OIDC job.
+      # All application checks run in the separate job above.
+      - run: npm install --global npm@11.19.0 --ignore-scripts --registry=https://registry.npmjs.org/
       - name: Verify release version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
@@ -37,12 +38,15 @@ jobs:
           assert.equal(process.env.RELEASE_TAG, `v${version}`, 'Release tag must match package.json');
           assert.equal(version.includes('-'), process.env.PRERELEASE === 'true', 'Prerelease flag must match version');
           JS
-      - name: Publish
+      - name: Stage for maintainer approval
         env:
           PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           if [ "$PRERELEASE" = true ]; then
-            npm publish --tag next
+            npm stage publish --ignore-scripts --tag next
           else
-            npm publish --tag latest
+            npm stage publish --ignore-scripts --tag latest
           fi
+      - name: Explain approval step
+        run: |
+          echo 'Package staged, not published. Review it in npmjs.com → Staged Packages and approve with 2FA.' >> "$GITHUB_STEP_SUMMARY"

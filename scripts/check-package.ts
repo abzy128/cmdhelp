@@ -16,7 +16,7 @@ try {
   for (const path of ['package.json', 'bin/cmdhelp', 'src/cli.ts', 'src/shell.ts', 'shell/cmdhelp.zsh']) {
     assert.ok(files.includes(path), `Missing package file: ${path}`);
   }
-  assert.ok(files.every(path => /^(package\.json|README\.md|config\.example\.json|bin\/|src\/|shell\/|docs\/)/.test(path)), 'Unexpected package contents');
+  assert.ok(files.every(path => /^(package\.json|README\.md|LICENSE|config\.example\.json|bin\/|src\/|shell\/|docs\/)/.test(path)), 'Unexpected package contents');
   execFileSync('npm', ['install', '--global', '--prefix', join(dir, 'install'), '--ignore-scripts', '--no-audit', '--no-fund', join(dir, packed.filename)], {
     cwd: dir, stdio: 'inherit',
   });
