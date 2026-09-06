@@ -7,7 +7,9 @@ _cmdhelp_widget() {
   {
     print -rn -- "$saved_buffer" > "$task_dir/input"
     zle -I
-    if cmdhelp ui --mode "$1" --buffer-file "$task_dir/input" --output-file "$task_dir/result" < /dev/tty > /dev/tty; then
+    # Bun on macOS does not receive stdin events through /dev/tty.
+    # Zsh's TTY names the concrete device (e.g. /dev/ttys001).
+    if cmdhelp ui --mode "$1" --buffer-file "$task_dir/input" --output-file "$task_dir/result" < "$TTY" > "$TTY"; then
       if [[ -s "$task_dir/result" ]]; then
         selected=$(<"$task_dir/result")
         BUFFER=$selected

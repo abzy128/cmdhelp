@@ -7,6 +7,11 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+test('zsh widgets accept keyboard input through Bun in a real terminal', () => {
+  const output = execFileSync('zsh', [join(root, 'test/interactive.zsh')], { encoding: 'utf8', timeout: 20_000 });
+  assert.match(output, /Interactive checks passed/);
+}, 25_000);
+
 test('CLI and zsh initialization work from a relocated installation with quotes/spaces', async () => {
   const dir = await mkdtemp(join(tmpdir(), "cmdhelp user's app-"));
   try {
