@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+import { realpathSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+const root = resolve(dirname(realpathSync(process.argv[1])), '..');
+const { tsImport } = await import(pathToFileURL(resolve(root, 'node_modules/tsx/dist/esm/api/index.mjs')).href);
+await tsImport(pathToFileURL(resolve(root, 'src/cli.ts')).href, import.meta.url);
