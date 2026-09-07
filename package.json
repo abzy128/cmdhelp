@@ -2,6 +2,7 @@
   "name": "@abzy128/cmdhelp",
   "version": "0.2.1",
   "description": "Fast command suggestions and explanations for your shell",
+  "license": "MIT",
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
   "type": "module",
   "packageManager": "bun@1.4.0",

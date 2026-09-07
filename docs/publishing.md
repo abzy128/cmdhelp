@@ -28,7 +28,7 @@ npm login --registry=https://registry.npmjs.org/
 npm publish
 ```
 
-Complete npm's authentication/2FA prompt. `publishConfig` sets public access and the npmjs registry. This uploads the package contents publicly even while the GitHub repository is private.
+Complete npm's authentication/2FA prompt. `publishConfig` sets public access and the npmjs registry. This uploads the package contents publicly.
 
 In the package settings on npmjs.com, add a GitHub Actions trusted publisher:
 
@@ -40,7 +40,7 @@ In the package settings on npmjs.com, add a GitHub Actions trusted publisher:
 | Environment | Leave blank |
 | Allowed actions | Staged publishing only; leave direct `npm publish` unchecked |
 
-The workflow uses GitHub-hosted runners and `id-token: write` for [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/); no npm token secret is needed. Provenance is automatic for eligible public repositories. The workflow does not force provenance because the repository is currently private.
+The workflow uses GitHub-hosted runners and `id-token: write` for [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/); no npm token secret is needed. Provenance is automatic for eligible public repositories.
 
 If you already enabled direct publishing, disable it in the trusted publisher settings (recreate the configuration if npm does not allow editing it). Enable 2FA on your npm account. CI must only be allowed to stage packages; approval happens through your interactive npm session. Check other trusted publishers and write tokens too: this configuration does not revoke their access.
 

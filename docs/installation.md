@@ -27,10 +27,8 @@ For npm installations, put `$(npm prefix -g)/bin` on `PATH` as well as Bun's exe
 
 Choose any directory in which to keep the application:
 
-GitHub access is required while the repository is private.
-
 ```sh
-git clone git@github.com:abzy128/cmdhelp.git
+git clone https://github.com/abzy128/cmdhelp.git
 cd cmdhelp
 bun install --frozen-lockfile
 bun link
@@ -38,12 +36,6 @@ cmdhelp --version
 ```
 
 `bun link` registers the checkout and exposes its `cmdhelp` executable in Bun's binary directory. Keep the checkout in place. To find the global executable directory, run `bun pm bin -g` and make sure that directory is on `PATH`.
-
-If GitHub SSH is not configured, use the HTTPS clone URL with your normal GitHub authentication:
-
-```sh
-git clone https://github.com/abzy128/cmdhelp.git
-```
 
 ## Enable zsh shortcuts
 
