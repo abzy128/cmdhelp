@@ -6,6 +6,10 @@ Describe what you want to do, inspect the suggestion, and insert it into your sh
 
 cmdhelp uses Pi's model API directly. It does not launch a coding agent or execute generated commands.
 
+![cmdhelp terminal panel suggesting a find command, with controls to insert it, ask a follow-up, scroll, or cancel](docs/images/cmdhelp.png)
+
+*The actual panel rendered with an example response. Press Enter to insert the suggestion into your shell prompt for editing.*
+
 ## Install
 
 Requires [Bun](https://bun.sh/docs/installation) 1.4+ and zsh on macOS or Linux.
