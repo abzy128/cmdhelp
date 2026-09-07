@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- macOS or Linux with zsh.
+- macOS or Linux with zsh, or Windows/macOS/Linux with PowerShell 7.4+ and PSReadLine. Windows PowerShell 5.1 and PowerShell ISE are not supported.
 - [Bun](https://bun.sh/docs/installation) 1.4 or newer, available on `PATH`.
 - A configured model provider: either an existing Pi profile or a provider API key. See [configuration](configuration.md).
 
@@ -21,7 +21,7 @@ Make sure the directory printed by `bun pm bin -g` is on `PATH` (normally `~/.bu
 npm install -g @abzy128/cmdhelp
 ```
 
-For npm installations, put `$(npm prefix -g)/bin` on `PATH` as well as Bun's executable directory. Installing through npm does not install Bun; the CLI requires Bun 1.4+ at runtime.
+For npm installations, put `$(npm prefix -g)/bin` on `PATH` on macOS/Linux, or the directory printed by `npm prefix -g` on Windows, as well as Bun's executable directory. Installing through npm does not install Bun; the CLI requires Bun 1.4+ at runtime.
 
 ## Install from a checkout
 
@@ -65,6 +65,52 @@ bindkey '^X^E' _cmdhelp_explain
 ```
 
 To remove a default binding before replacing it, use `bindkey -r '^X^G'` or `bindkey -r '^X^E'`. Check a candidate sequence with `bindkey 'sequence'` before assigning it.
+
+## Enable PowerShell shortcuts
+
+Use PowerShell 7.4+ (`pwsh`) in a terminal such as Windows Terminal. Install Bun and cmdhelp using the commands above; Bun's default Windows executable directory is `$HOME\.bun\bin`.
+
+Create your profile if it does not exist, then open it in your editor:
+
+```powershell
+New-Item -ItemType Directory -Force (Split-Path $PROFILE) | Out-Null
+if (-not (Test-Path -LiteralPath $PROFILE)) {
+  New-Item -ItemType File -Path $PROFILE | Out-Null
+}
+notepad $PROFILE # On Windows; use your editor on macOS/Linux
+```
+
+Add this line after other prompt plugins, and run it once in your current session:
+
+```powershell
+cmdhelp init powershell | Out-String | Invoke-Expression
+```
+
+This evaluates only the local initialization statement printed by cmdhelp. It loads PSReadLine, defines a Bun-backed `cmdhelp` function, and binds Ctrl-X then Ctrl-G to suggest, and Ctrl-X then Ctrl-E to explain. Generated commands are passed to PSReadLine's literal buffer replacement API and require a separate Enter to run. Escape/Ctrl-C restores the original input and cursor. Temporary files use an owner-only Windows ACL (Unix mode 0700 on macOS/Linux) and are removed when the handler exits.
+
+To customize shortcuts, add bindings after initialization:
+
+```powershell
+Set-PSReadLineKeyHandler -Chord 'Ctrl+x,Ctrl+g' -ScriptBlock { Invoke-CmdhelpWidget suggest }
+Set-PSReadLineKeyHandler -Chord 'Ctrl+x,Ctrl+e' -ScriptBlock { Invoke-CmdhelpWidget explain }
+```
+
+Inspect bindings with `Get-PSReadLineKeyHandler -Chord 'Ctrl+x,Ctrl+g'`. Remove one with `Remove-PSReadLineKeyHandler -Chord 'Ctrl+x,Ctrl+g'`. The Ctrl-X chord prefix replaces PSReadLine's default Ctrl-X cut binding in Windows editing mode; see the [PSReadLine function reference](https://learn.microsoft.com/en-us/powershell/module/psreadline/about/about_psreadline_functions).
+
+If PowerShell says scripts are disabled, inspect `Get-ExecutionPolicy -List`. On a personal machine where policy permits it, `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` enables local profiles; organization policy takes precedence. No administrator session is required to install or use cmdhelp.
+
+PowerShell stdin example:
+
+```powershell
+Get-Content -Raw command.txt | cmdhelp explain
+cmdhelp suggest 'list the ten largest files in this directory'
+```
+
+For a checkout, you can also initialize directly before creating a package-manager link:
+
+```powershell
+bun src/cli.ts init powershell | Out-String | Invoke-Expression
+```
 
 ## Configure a model
 
@@ -135,6 +181,22 @@ script -qec 'zsh test/widget.zsh' /dev/null
 ```
 
 These tests use fixtures, make no model requests, and check cancellation, failure handling, literal insertion, and cursor restoration.
+
+For PowerShell on any supported OS:
+
+```powershell
+bun run check
+bun test
+pwsh -NoProfile -File test/widget.ps1
+```
+
+The PowerShell handler tests use a PSReadLine buffer double and verify private temporary directories, Unicode/multiline insertion, failure and cancellation cleanup, and cursor restoration. Separate tests load real PSReadLine bindings and exercise installation from paths containing spaces and quotes. On macOS/Linux with `pwsh` and `python3`, `bun test` also drives real PowerShell and Bun through a pseudo-terminal. A successful run prints:
+
+```text
+PowerShell terminal checks passed: typing, Enter, Tab, Escape, Ctrl-C, both shortcuts, and buffer restoration.
+```
+
+CI runs on Windows, macOS, and Linux. For a native Windows interactive smoke check, open a configured terminal, type an unfinished command, move the cursor, launch each shortcut, cancel, and confirm the input and cursor are restored; then insert a suggestion and confirm it waits for Enter.
 
 ## Troubleshooting
 

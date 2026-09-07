@@ -1,7 +1,8 @@
 import { Input, ProcessTerminal, TuiMainScreen, matchesKey, wrapTextWithAnsi, truncateToWidth, type Component } from '@earendil-works/pi-tui';
 import { clean, createClient, extractCommand, type Mode, type Client } from './core.ts';
+import type { Shell } from './shell.ts';
 
-export async function panel(mode: Mode, initial: string): Promise<string | undefined> {
+export async function panel(mode: Mode, initial: string, shell: Shell): Promise<string | undefined> {
   const terminal = new ProcessTerminal();
   const tui = new TuiMainScreen(terminal);
   const input = new Input({ prompt: '> ', placeholder: mode === 'suggest' ? 'What command do you need?' : 'Paste a command to explain' });
@@ -64,7 +65,7 @@ export async function panel(mode: Mode, initial: string): Promise<string | undef
   tui.addChild(component);
   tui.setFocus(component);
   tui.start();
-  client = createClient();
+  client = createClient(shell);
   // Handle initialization rejection even before the user submits.
   void client.then(api => { label = api.label; if (!finished) tui.requestRender(); }, error => {
     label = 'configuration error'; body = clean(error.message); if (!finished) tui.requestRender();

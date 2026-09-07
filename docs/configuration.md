@@ -29,6 +29,8 @@ cmdhelp automatically refreshes supported OAuth credentials and saves refreshed 
 
 Create `~/.config/cmdhelp/config.json`, or `$XDG_CONFIG_HOME/cmdhelp/config.json` when `XDG_CONFIG_HOME` is set. The file is optional if Pi supplies a default provider and model.
 
+On Windows, the default is `$HOME\.config\cmdhelp\config.json`, and Pi's default profile is `$HOME\.pi\agent`. PowerShell environment variables use `$env:CMDHELP_MODEL = 'model-id'` syntax. In JSON paths, use forward slashes (`C:/Users/you/.pi/agent`) or escape backslashes (`C:\\Users\\you\\.pi\\agent`); `~/.pi/agent` also works.
+
 ```json
 {
   "reasoning": "low",
