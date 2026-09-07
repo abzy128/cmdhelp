@@ -1,6 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm, symlink, lstat } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, symlink, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { clean, extractCommand, PiCredentials } from '../src/core.ts';
@@ -18,15 +18,20 @@ test('terminal output cannot contain active escape controls', () => {
 test('credential updates preserve profile symlinks and concurrent provider writes', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'cmdhelp-test-'));
   try {
-    const target = join(dir, 'auth.json'), link = join(dir, 'profile-auth.json');
+    await mkdir(join(dir, 'real'));
+    const target = join(dir, 'real/auth.json'), link = join(dir, 'profile-auth.json');
     await writeFile(target, JSON.stringify({ existing: { type: 'api_key', key: 'fixture' } }), { mode: 0o600 });
-    await symlink(target, link);
-    const one = new PiCredentials(link), two = new PiCredentials(link);
+    // Windows directory junctions do not need Developer Mode or symlink privileges.
+    if (process.platform === 'win32') {
+      await symlink(join(dir, 'real'), join(dir, 'profile'), 'junction');
+    } else await symlink(target, link);
+    const authPath = process.platform === 'win32' ? join(dir, 'profile/auth.json') : link;
+    const one = new PiCredentials(authPath), two = new PiCredentials(authPath);
     await Promise.all([
       one.modify('a', async () => ({ type: 'api_key', key: 'a' })),
       two.modify('b', async () => ({ type: 'api_key', key: 'b' })),
     ]);
-    assert.ok((await lstat(link)).isSymbolicLink());
+    assert.ok((await lstat(process.platform === 'win32' ? join(dir, 'profile') : link)).isSymbolicLink());
     assert.deepEqual(Object.keys(JSON.parse(await readFile(target, 'utf8'))).sort(), ['a', 'b', 'existing']);
     await assert.rejects(one.modify('a', async () => { throw new Error('failed refresh'); }));
     assert.equal((await one.read('a') as any).key, 'a');

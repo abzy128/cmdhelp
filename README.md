@@ -1,6 +1,6 @@
 # cmdhelp
 
-Command suggestions and explanations, one shortcut away in zsh.
+Command suggestions and explanations, one shortcut away in zsh or PowerShell.
 
 Describe what you want to do, inspect the suggestion, and insert it into your shell prompt. Or paste a command and ask what it means. Responses stream into a small terminal panel, with follow-up questions and cancellation.
 
@@ -12,7 +12,7 @@ cmdhelp uses Pi's model API directly. It does not launch a coding agent or execu
 
 ## Install
 
-Requires [Bun](https://bun.sh/docs/installation) 1.4+ and zsh on macOS or Linux.
+Requires [Bun](https://bun.sh/docs/installation) 1.4+ and either zsh on macOS/Linux or PowerShell 7.4+ with PSReadLine on Windows/macOS/Linux.
 
 ```sh
 bun add -g @abzy128/cmdhelp
@@ -25,6 +25,14 @@ eval "$(cmdhelp init zsh)"
 ```
 
 Run the same line in your current shell to enable the shortcuts immediately. Configure a provider and model before making your first request.
+
+For PowerShell, add this to `$PROFILE` and run it in your current session:
+
+```powershell
+cmdhelp init powershell | Out-String | Invoke-Expression
+```
+
+The init command loads the installed integration script. Suggestions are always inserted as literal text. See the [Windows setup instructions](docs/installation.md#enable-powershell-shortcuts) for profile creation and key bindings.
 
 **[Installation guide](docs/installation.md)** · **[Configuration guide](docs/configuration.md)**
 
@@ -51,6 +59,8 @@ cmdhelp doctor
 ```
 
 Quote command arguments literally to prevent your shell from expanding `$()`, backticks, pipes, or redirections. Pipe command text on stdin when quoting is inconvenient.
+
+PowerShell uses `Get-Content -Raw command.txt | cmdhelp explain` instead of `< command.txt`. The shell integrations select the correct syntax for model requests. Without integration, the CLI defaults to PowerShell on Windows and zsh elsewhere; use `--shell powershell` or `--shell zsh` to override it.
 
 ## Configuration
 
