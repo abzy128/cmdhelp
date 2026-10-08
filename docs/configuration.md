@@ -19,7 +19,20 @@ bun add --global @earendil-works/pi-coding-agent
 pi
 ```
 
-In Pi, use `/login` to authenticate, then `/model` to select a model. Save it as the startup default in the model picker, or set `provider` and `model` explicitly in cmdhelp's config. For a Codex subscription, choose the OpenAI Codex provider in Pi's login flow; its provider ID is `openai-codex`.
+In Pi, use `/login` to authenticate, then `/model` to select a model. Save it as the startup default in the model picker, or set `provider` and `model` explicitly in cmdhelp's config.
+
+For a ChatGPT subscription, choose **OpenAI → Sign in with ChatGPT** (`/login openai`) in Pi 1.1.0 or newer. This login is stored under provider ID `openai` and is supported by cmdhelp's bundled Pi AI 1.1.0 SDK. For example:
+
+```json
+{
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "reasoning": "low",
+  "timeoutMs": 30000
+}
+```
+
+The legacy `openai-codex` provider is still supported for existing Codex logins. Its credentials are separate: changing the provider ID or copying a Codex credential into `openai` does not convert it to a Sign in with ChatGPT login. Authenticate with `/login openai` when migrating.
 
 If a model is absent from the local catalog, refresh Pi's model cache with `pi update --models`. For a custom profile, run Pi with that same `PI_CODING_AGENT_DIR`.
 
@@ -94,4 +107,12 @@ Profile precedence: `CMDHELP_PI_PROFILE` → config `profile` → `PI_CODING_AGE
 
 ## Limits
 
-Only built-in Pi providers and cached model definitions are supported. Pi extensions, custom `models.json` providers, prompt templates, and skills are not loaded. Follow-up context exists only for the current panel. `doctor` checks the local configuration/catalog, not whether your credentials are accepted by the server.
+Only built-in Pi providers and cached chat model definitions are supported. Image and classifier entries in newer Pi caches are ignored. Pi extensions, custom `models.json` providers, prompt templates, and skills are not loaded. Follow-up context exists only for the current panel. `doctor` checks the local configuration/catalog, not whether your credentials are accepted by the server.
+
+## Troubleshooting
+
+### `Provider is not configured: openai`
+
+Older cmdhelp versions bundled Pi AI 0.85.1, where `openai` accepted API keys but not ChatGPT OAuth credentials. A newer Pi login could therefore work in Pi and fail in cmdhelp. Update cmdhelp as well as Pi; updating the globally installed Pi CLI alone does not update cmdhelp's bundled SDK.
+
+If the error persists, run `cmdhelp doctor` to check the effective profile/provider/model. Confirm that `/login openai` was completed in Pi using the same profile, or supply `OPENAI_API_KEY` for API-key authentication. Do not paste credentials into cmdhelp's config or rename credentials from `openai-codex`.
