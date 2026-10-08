@@ -3,7 +3,7 @@ import { platform } from 'node:os';
 import { join } from 'node:path';
 import lockfile from 'proper-lockfile';
 import { builtinModels } from '@earendil-works/pi-ai/providers/all';
-import { InMemoryModelsStore, type Credential, type CredentialStore, type AuthOperationOptions, type Context } from '@earendil-works/pi-ai';
+import { InMemoryModelsStore, isModelType, type Credential, type CredentialStore, type AuthOperationOptions, type Context } from '@earendil-works/pi-ai';
 import { loadConfig } from './config.ts';
 
 export type Mode = 'suggest' | 'explain';
@@ -69,7 +69,8 @@ export async function createClient() {
   const models = builtinModels({ credentials, modelsStore: store });
   await models.refresh({ allowNetwork: false, providers: [config.provider] });
   const cached = await store.read(config.provider);
-  const model = cached?.models.find(m => m.id === config.model && m.provider === config.provider)
+  // Current Pi caches include image and classifier models as well as chat models.
+  const model = cached?.models.filter(m => isModelType(m, 'chat')).find(m => m.id === config.model && m.provider === config.provider)
     ?? models.getModel(config.provider, config.model);
   if (!model) throw new Error(`Model ${config.provider}/${config.model} is unavailable in this Pi SDK/catalog.`);
   const history: Context['messages'] = [];
