@@ -3,13 +3,23 @@
   "version": "0.2.1",
   "description": "Fast command suggestions and explanations for your shell",
   "license": "MIT",
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "packageManager": "bun@1.4.0",
-  "engines": { "bun": ">=1.4.0" },
-  "bin": { "cmdhelp": "bin/cmdhelp" },
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "bin": {
+    "cmdhelp": "bin/cmdhelp"
+  },
   "files": ["bin", "src", "shell", "docs", "config.example.json", "README.md"],
-  "repository": { "type": "git", "url": "git+https://github.com/abzy128/cmdhelp.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abzy128/cmdhelp.git"
+  },
   "scripts": {
     "start": "bun src/cli.ts",
     "check": "tsc --noEmit",
@@ -18,12 +28,12 @@
     "prepublishOnly": "bun run check && bun test"
   },
   "dependencies": {
-    "@earendil-works/pi-ai": "1.1.0",
-    "@earendil-works/pi-tui": "1.1.0",
+    "@earendil-works/pi-ai": "1.5.2",
+    "@earendil-works/pi-tui": "1.5.2",
     "proper-lockfile": "4.1.2"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.0",
+    "@types/bun": "^1.4.4",
     "@types/proper-lockfile": "^4.1.4",
     "typescript": "^5.9.0"
   }

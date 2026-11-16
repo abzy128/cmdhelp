@@ -13,9 +13,15 @@ export async function json(path: string): Promise<any> {
   catch (error: any) { if (error.code === 'ENOENT') return {}; throw new Error(`Cannot read JSON configuration: ${path}`); }
 }
 
-// Same lock protocol/path as Pi. Write through profile symlinks, preserving them.
+// Same lock protocol/path as Pi: lock the resolved file so symlinked aliases of
+// auth.json share one lock. Write through profile symlinks, preserving them.
 export class PiCredentials implements CredentialStore {
   constructor(private path: string) {}
+  private async lock(retries: lockfile.LockOptions['retries']) {
+    // Resolving the lock path needs the file; create it like Pi does.
+    await writeFile(this.path, '{}', { mode: 0o600, flag: 'wx' }).catch((error: any) => { if (error.code !== 'EEXIST') throw error; });
+    return lockfile.lock(this.path, { stale: 30_000, retries });
+  }
   async read(id: string) { return (await json(this.path))[id] as Credential | undefined; }
   async list() {
     const data = await json(this.path);
@@ -23,7 +29,7 @@ export class PiCredentials implements CredentialStore {
   }
   async modify(id: string, fn: (c: Credential | undefined) => Promise<Credential | undefined>, options?: AuthOperationOptions) {
     options?.signal?.throwIfAborted();
-    const release = await lockfile.lock(this.path, { realpath: false, stale: 30_000, retries: { retries: 8, minTimeout: 25, maxTimeout: 250 } });
+    const release = await this.lock({ retries: 8, minTimeout: 25, maxTimeout: 250 });
     try {
       options?.signal?.throwIfAborted();
       const data = await json(this.path);
@@ -38,7 +44,7 @@ export class PiCredentials implements CredentialStore {
   }
   async delete(id: string, options?: AuthOperationOptions) {
     options?.signal?.throwIfAborted();
-    const release = await lockfile.lock(this.path, { realpath: false, stale: 30_000, retries: 3 });
+    const release = await this.lock(3);
     try {
       options?.signal?.throwIfAborted();
       const data = await json(this.path);

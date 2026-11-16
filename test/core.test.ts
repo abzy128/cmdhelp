@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, readFile, rm, symlink, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import lockfile from 'proper-lockfile';
 import { clean, extractCommand, PiCredentials } from '../src/core.ts';
 
 test('only complete, unambiguous command blocks can be inserted', () => {
@@ -36,5 +37,28 @@ test('credential updates preserve profile symlinks and concurrent provider write
     await one.delete('a');
     assert.equal(await one.read('a'), undefined);
     assert.equal((await one.read('b') as any).key, 'b');
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+test('credential locks through a symlinked profile block Pi on the resolved auth.json', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'cmdhelp-test-'));
+  try {
+    const target = join(dir, 'auth.json'), link = join(dir, 'profile-auth.json');
+    await writeFile(target, '{}', { mode: 0o600 });
+    await symlink(target, link);
+    // Pi 1.5.1+ locks the resolved path (proper-lockfile's default realpath: true).
+    await new PiCredentials(link).modify('a', async () => {
+      assert.equal(await lockfile.check(target), true);
+      return { type: 'api_key', key: 'a' };
+    });
+    assert.equal(await lockfile.check(target), false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+test('credential updates create a missing auth.json privately', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'cmdhelp-test-'));
+  try {
+    const path = join(dir, 'auth.json');
+    await new PiCredentials(path).modify('a', async () => ({ type: 'api_key', key: 'a' }));
+    assert.equal((await lstat(path)).mode & 0o777, 0o600);
+    assert.equal((JSON.parse(await readFile(path, 'utf8')).a).key, 'a');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

@@ -21,7 +21,7 @@ pi
 
 In Pi, use `/login` to authenticate, then `/model` to select a model. Save it as the startup default in the model picker, or set `provider` and `model` explicitly in cmdhelp's config.
 
-For a ChatGPT subscription, choose **OpenAI → Sign in with ChatGPT** (`/login openai`) in Pi 1.1.0 or newer. This login is stored under provider ID `openai` and is supported by cmdhelp's bundled Pi AI 1.1.0 SDK. For example:
+For a ChatGPT subscription, choose **OpenAI → Sign in with ChatGPT** (`/login openai`) in Pi 1.1.0 or newer. This login is stored under provider ID `openai` and is supported by cmdhelp's bundled Pi AI SDK. For example:
 
 ```json
 {
