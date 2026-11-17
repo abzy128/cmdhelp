@@ -6,7 +6,7 @@ jobs:
   check:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -24,7 +24,11 @@ jobs:
       - run: bun run check
       - run: bun test
       - run: bun run test:package
-      - run: zsh -n shell/cmdhelp.zsh
+      - if: runner.os != 'Windows'
+        run: zsh -n shell/cmdhelp.zsh
+      - name: Check PowerShell integration
+        shell: pwsh
+        run: ./test/widget.ps1
       - if: runner.os == 'macOS'
         run: script -q /dev/null zsh test/widget.zsh
       - if: runner.os == 'Linux'

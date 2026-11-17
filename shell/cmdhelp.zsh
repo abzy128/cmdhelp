@@ -1,6 +1,6 @@
 # Source after history plugins. All model output is data, never shell code.
 _cmdhelp_root=${${(%):-%x}:A:h:h}
-cmdhelp() { command "$_cmdhelp_root/bin/cmdhelp" "$@"; }
+cmdhelp() { command "$_cmdhelp_root/bin/cmdhelp" --shell zsh "$@"; }
 _cmdhelp_widget() {
   local saved_buffer=$BUFFER saved_cursor=$CURSOR task_dir selected
   task_dir=$(mktemp -d "${TMPDIR:-/tmp}/cmdhelp.XXXXXXXX") || return
